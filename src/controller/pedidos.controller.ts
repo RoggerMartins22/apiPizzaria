@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler} from 'express';
 import { AppDataSource } from '../config/data-source';
 import { Pedido, StatusPedido } from '../entity/pedidos';
 import { Cliente } from '../entity/cliente';
@@ -8,18 +8,20 @@ const pedidoRepository = AppDataSource.getRepository(Pedido);
 const clienteRepository = AppDataSource.getRepository(Cliente);
 const pizzaRepository = AppDataSource.getRepository(Pizza);
 
-export const criarPedido = async (req: Request, res: Response): Promise<Response> => {
+export const criarPedido: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   try {
       const { clienteId, pizzaId, quantidade } = req.body;
 
       const cliente = await AppDataSource.getRepository(Cliente).findOne({ where: { id: clienteId } });
       if (!cliente) {
-          return res.status(404).json({ message: "Cliente não encontrado" });
+        res.status(404).json({ message: "Cliente não encontrado" });
+        return
       }
 
       const pizza = await AppDataSource.getRepository(Pizza).findOne({ where: { id: pizzaId } });
       if (!pizza) {
-          return res.status(404).json({ message: "Pizza não encontrada" });
+        res.status(404).json({ message: "Pizza não encontrada" });
+        return
       }
 
       const valorTotal = pizza.preco * quantidade;
@@ -32,24 +34,25 @@ export const criarPedido = async (req: Request, res: Response): Promise<Response
       pedido.status = StatusPedido.PENDENTE;
 
       await AppDataSource.getRepository(Pedido).save(pedido);
-      return res.status(201).json({ message: "Pedido criado com sucesso", pedido });
+      res.status(201).json({ message: "Pedido criado com sucesso", pedido });
   } catch (error) {
       if (error instanceof Error) {
-          return res.status(500).json({ error: "Erro ao criar pedido", detalhes: error.message });
+        res.status(500).json({ error: "Erro ao criar pedido", detalhes: error.message });
       }
-      return res.status(500).json({ error: "Erro desconhecido ao criar pedido" });
+       res.status(500).json({ error: "Erro desconhecido ao criar pedido" });
   }
 };
 
 
-export const obterPedidos = async (req: Request, res: Response) => {
+export const obterPedidos: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     try {
         const pedidos = await pedidoRepository.find({
             relations: ['idCliente', 'idPizza'],
         });
 
         if (pedidos.length === 0) {
-            return res.status(404).json({ message: 'Não existem pedidos cadastrados!' });
+            res.status(404).json({ message: 'Não existem pedidos cadastrados!' });
+            return
         }
 
         res.json(pedidos);
@@ -58,7 +61,7 @@ export const obterPedidos = async (req: Request, res: Response) => {
     }
 };
 
-export const obterPedidosId = async (req: Request, res: Response) => {
+export const obterPedidosId: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
 
     try {
@@ -68,7 +71,8 @@ export const obterPedidosId = async (req: Request, res: Response) => {
         });
 
         if (!pedido) {
-            return res.status(404).json({ message: 'Pedido não encontrado' });
+            res.status(404).json({ message: 'Pedido não encontrado' });
+            return
         }
 
         res.json(pedido);
@@ -77,7 +81,7 @@ export const obterPedidosId = async (req: Request, res: Response) => {
     }
 };
 
-export const atualizarPedido = async (req: Request, res: Response) => {
+export const atualizarPedido: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { pizzaId, quantidade } = req.body;
 
@@ -88,16 +92,19 @@ export const atualizarPedido = async (req: Request, res: Response) => {
         });
 
         if (!pedido) {
-            return res.status(404).json({ message: 'Pedido não encontrado' });
+            res.status(404).json({ message: 'Pedido não encontrado' });
+            return
         }
 
         const pizza = await pizzaRepository.findOne({ where: { id: pizzaId } });
         if (!pizza) {
-            return res.status(404).json({ message: 'Pizza não encontrada' });
+            res.status(404).json({ message: 'Pizza não encontrada' });
+            return
         }
 
         if (!pizza.disponibilidade) {
-            return res.status(400).json({ message: 'Pizza indisponível no momento' });
+            res.status(400).json({ message: 'Pizza indisponível no momento' });
+            return
         }
 
         pedido.idPizza = pizza;

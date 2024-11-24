@@ -19,9 +19,9 @@ AppDataSource.initialize()
 app.use(express.json());
 
 // Rotas da API
-app.use('/api/pizzas', pizzaRoutes);
-app.use('/api/clientes', clientesRoutes);
-app.use('/api/pedidos', pedidosRoutes);
+app.use('/pizzas', pizzaRoutes);
+app.use('/clientes', clientesRoutes);
+app.use('/pedidos', pedidosRoutes);
 
 // Definir a porta da API
 const PORT = process.env.PORT || 3000;

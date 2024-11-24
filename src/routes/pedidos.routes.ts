@@ -3,9 +3,9 @@ import { criarPedido, obterPedidos, obterPedidosId, atualizarPedido} from '../co
 
 const router = Router();
 
-router.post('/pedidos', criarPedido);
-router.get('/pedidos', obterPedidos);
-router.get('/pedidos/:id', obterPedidosId);
-router.put('/pedidos/:id', atualizarPedido);
+router.post('/', criarPedido);
+router.get('/', obterPedidos);
+router.get('/:id', obterPedidosId);
+router.put('/:id', atualizarPedido);
 
 export default router;
