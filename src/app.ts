@@ -2,6 +2,7 @@ import express from 'express';
 import { AppDataSource } from './config/data-source';
 import pizzaRoutes from './routes/pizza.routes';
 import clientesRoutes from './routes/cliente.routes';
+import pedidosRoutes from './routes/pedidos.routes';
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 // Rotas da API
 app.use('/api/pizzas', pizzaRoutes);
 app.use('/api/clientes', clientesRoutes);
+app.use('/api/pedidos', pedidosRoutes);
 
 // Definir a porta da API
 const PORT = process.env.PORT || 3000;
