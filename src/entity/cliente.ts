@@ -1,6 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, OneToMany, Column } from "typeorm";
 import { Pedido } from './pedidos';
 
+export enum StatusCliente {
+    ATIVO = "A",
+    CANCELADO = "C",
+}
+
 @Entity()
 export class Cliente {
     @PrimaryGeneratedColumn()
@@ -17,6 +22,13 @@ export class Cliente {
 
     @Column("text", { array: true })
     endereco!: string[];
+
+    @Column({
+        type: "enum",
+        enum: StatusCliente,
+        default: StatusCliente.ATIVO,
+    })
+    status!: StatusCliente;
 
     @OneToMany(() => Pedido, pedido => pedido.idCliente)
     pedidos!: Pedido[];
