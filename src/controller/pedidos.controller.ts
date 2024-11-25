@@ -108,6 +108,24 @@ export const atualizarPedido: RequestHandler = async (req, res) => {
   const { idCliente, idPizza, quantidade, status } = req.body;
 
   try {
+    const mapaStatus = {
+      [StatusPedido.PENDENTE]: "Pendente",
+      [StatusPedido.CONFIRMADO]: "Confirmado",
+      [StatusPedido.EM_PREPARACAO]: "Em Preparação",
+      [StatusPedido.A_CAMINHO]: "A Caminho",
+      [StatusPedido.ENTREGUE]: "Entregue",
+      [StatusPedido.CANCELADO]: "Cancelado",
+    };
+
+    const statusValidos = Object.keys(mapaStatus);
+    if (status && !statusValidos.includes(status)) {
+      res.status(400).json({
+        message: "Status inválido. Status aceitos:",
+        statusValidos: Object.entries(mapaStatus).map(([key, value]) => `${key} - ${value}`),
+      });
+      return;
+    }
+
     const pedido = await pedidoRepository.findOne({
       where: { idPedido: Number(id) },
       relations: ["idCliente", "idPizza"],
@@ -149,9 +167,8 @@ export const atualizarPedido: RequestHandler = async (req, res) => {
       pedido.idPizza = pizza;
     }
 
-    if (status && !Object.values(StatusPedido).includes(status)) {
-      res.status(400).json({ message: "Status inválido" });
-      return;
+    if (status) {
+      pedido.status = status;
     }
 
     pedido.status = status || pedido.status;
