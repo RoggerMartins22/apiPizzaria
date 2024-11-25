@@ -23,11 +23,14 @@ export const criarPedido: RequestHandler = async (req, res) => {
       res.status(400).json({ message: "Dados insuficientes para criar o pedido" });
       return;
     }
+
     if (quantidade <= 0) {
       res.status(400).json({ message: "A quantidade deve ser maior que zero" });
       return;
     }
+
     const cliente = await validarCliente(idCliente);
+    
     if (!cliente) {
       res.status(404).json({ message: "Cliente não encontrado" });
       return;
@@ -38,6 +41,7 @@ export const criarPedido: RequestHandler = async (req, res) => {
       res.status(404).json({ message: "Pizza não encontrada" });
       return;
     }
+
     if (!pizza.disponibilidade) {
       res.status(400).json({ message: "Pizza indisponível no momento" });
       return;
@@ -70,6 +74,7 @@ export const obterPedidos: RequestHandler = async (_req, res) => {
     const pedidos = await pedidoRepository.find({
       relations: ["idCliente", "idPizza"],
     });
+
     if (pedidos.length === 0) {
       res.status(404).json({ message: "Não existem pedidos cadastrados!" });
       return;
@@ -87,6 +92,7 @@ export const obterPedidosId: RequestHandler = async (req, res) => {
       where: { idPedido: Number(id) },
       relations: ["idCliente", "idPizza"],
     });
+
     if (!pedido) {
       res.status(404).json({ message: "Pedido não encontrado" });
       return;
@@ -99,17 +105,26 @@ export const obterPedidosId: RequestHandler = async (req, res) => {
 
 export const atualizarPedido: RequestHandler = async (req, res) => {
   const { id } = req.params;
-  const { idPizza, quantidade, status } = req.body;
+  const { idCliente, idPizza, quantidade, status } = req.body;
 
   try {
     const pedido = await pedidoRepository.findOne({
       where: { idPedido: Number(id) },
-      relations: ["idPizza"],
+      relations: ["idCliente", "idPizza"],
     });
+
     if (!pedido) {
       res.status(404).json({ message: "Pedido não encontrado" });
       return;
     }
+
+    if (idCliente && idCliente !== pedido.idCliente.id) {
+      res.status(400).json({
+        message: "Não é permitido alterar o cliente.",
+      });
+      return;
+    }
+
     if (quantidade !== undefined) {
       if (quantidade <= 0) {
         res.status(400).json({ message: "Quantidade deve ser maior que zero" });
@@ -118,14 +133,22 @@ export const atualizarPedido: RequestHandler = async (req, res) => {
       pedido.quantidade = quantidade;
       pedido.valorTotal = pedido.idPizza.preco * quantidade;
     }
+
     if (idPizza) {
       const pizza = await validarPizza(idPizza);
+      
       if (!pizza) {
         res.status(404).json({ message: "Pizza não encontrada" });
         return;
       }
+      
+      if (!pizza.disponibilidade) {
+        res.status(400).json({ message: "Pizza indisponível no momento" });
+        return;
+      }
       pedido.idPizza = pizza;
     }
+
     if (status && !Object.values(StatusPedido).includes(status)) {
       res.status(400).json({ message: "Status inválido" });
       return;
@@ -137,9 +160,9 @@ export const atualizarPedido: RequestHandler = async (req, res) => {
 
     res.status(200).json({ message: "Pedido atualizado com sucesso", pedido });
   } catch (error) {
-      res.status(500).json({
-        message: "Erro ao atualizar pedido",
-        detalhes: error instanceof Error ? error.message : error,
-      });
-    }
+    res.status(500).json({
+      message: "Erro ao atualizar pedido",
+      detalhes: error instanceof Error ? error.message : error,
+    });
+  }
 };
