@@ -4,22 +4,29 @@ import { Pizza } from "../entity/pizza";
 
 const pizzaRepository = AppDataSource.getRepository(Pizza);
 
-export const getPizzas = async (req: Request, res: Response) => {
+export const obterPizzas = async (req: Request, res: Response) => {
     try {
-        const pizzas = await pizzaRepository.find({ where: { disponibilidade: true } });
+        const pizzas = await pizzaRepository.find();
         
         if (pizzas.length === 0) {
             res.status(404).json({ message: "Não existem pizzas cadastradas ou ativas!" });
             return
         }
-        res.json(pizzas);
+        res.status(200).json({message: "Pizzas disponíveis encontradas com sucesso.", data: pizzas,});
+
     } catch (error) {
         res.status(500).json({ message: "Erro ao buscar pizzas", error });
     }
 };
 
-export const getPizzasById: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const obterPizzaId: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
+
+    if (isNaN(Number(id))) {
+        res.status(400).json({ message: "ID inválido. Por favor, forneça um número válido." });
+        return;
+    }
+
     try {
         const pizza = await pizzaRepository.findOneBy({ id: Number(id) });
         if (!pizza) {
@@ -36,7 +43,7 @@ export const getPizzasById: RequestHandler = async (req: Request, res: Response)
     }
 };
 
-export const addPizza: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const adicionarPizza: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     try {
         const { nome, ingredientes, preco, disponibilidade } = req.body;
 
@@ -63,8 +70,14 @@ export const addPizza: RequestHandler = async (req: Request, res: Response): Pro
     }
 };
 
-export const updatePizza: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const atualizarPizza: RequestHandler = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
+
+    if (isNaN(Number(id))) {
+        res.status(400).json({ message: "ID inválido. Por favor, forneça um número válido." });
+        return;
+    }
+
     try {
         const pizza = await pizzaRepository.findOneBy({ id: Number(id) });
         if (!pizza) {

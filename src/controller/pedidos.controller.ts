@@ -87,6 +87,12 @@ export const obterPedidos: RequestHandler = async (_req, res) => {
 
 export const obterPedidosId: RequestHandler = async (req, res) => {
   const { id } = req.params;
+
+  if (isNaN(Number(id))) {
+    res.status(400).json({ message: "ID inválido. Por favor, forneça um número válido." });
+    return;
+  }
+
   try {
     const pedido = await pedidoRepository.findOne({
       where: { idPedido: Number(id) },
@@ -106,6 +112,11 @@ export const obterPedidosId: RequestHandler = async (req, res) => {
 export const atualizarPedido: RequestHandler = async (req, res) => {
   const { id } = req.params;
   const { idCliente, idPizza, quantidade, status } = req.body;
+
+  if (isNaN(Number(id))) {
+    res.status(400).json({ message: "ID inválido. Por favor, forneça um número válido." });
+    return;
+  }
 
   try {
     const mapaStatus = {

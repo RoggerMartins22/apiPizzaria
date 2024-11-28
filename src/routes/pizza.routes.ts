@@ -1,11 +1,11 @@
 import { Router} from 'express';
-import { getPizzas, getPizzasById, addPizza, updatePizza} from "../controller/pizza.controller";
+import { obterPizzas, obterPizzaId, adicionarPizza, atualizarPizza} from "../controller/pizza.controller";
 
 const router = Router();
 
-router.get("/", getPizzas);
-router.get("/:id", getPizzasById);
-router.post("/", addPizza);
-router.put("/:id", updatePizza);
+router.get("/", obterPizzas);
+router.get("/:id", obterPizzaId);
+router.post("/", adicionarPizza);
+router.put("/:id", atualizarPizza);
 
 export default router;

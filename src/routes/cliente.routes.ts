@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { getClientes, addCliente, getClientesById,updateCliente } from '../controller/cliente.controller';
+import { adicionarCliente, obterClientes, obterClientesId, atualizarCliente } from '../controller/cliente.controller';
 
 const router = Router();
 
-router.get('/', getClientes);
-router.post('/', addCliente);
-router.get('/:id', getClientesById);
-router.put("/:id", updateCliente);
+router.get('/', obterClientes);
+router.post('/', adicionarCliente);
+router.get('/:id', obterClientesId);
+router.put("/:id", atualizarCliente);
 
 export default router;
